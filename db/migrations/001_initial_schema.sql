@@ -322,8 +322,25 @@ BEFORE UPDATE ON ai_intel.daily_briefs
 FOR EACH ROW
 EXECUTE FUNCTION ai_intel.set_updated_at();
 
+INSERT INTO ai_intel.news_sources
+    (name, source_type, source_locator, category, priority)
+VALUES
+    ('OpenRouter', 'web', 'https://openrouter.ai/announcements', 'platform', 95),
+    ('Ollama', 'github', 'ollama/ollama', 'platform', 95),
+    ('Open WebUI', 'github', 'open-webui/open-webui', 'platform', 95),
+    ('n8n', 'github', 'n8n-io/n8n', 'workflow', 90)
+ON CONFLICT (source_type, source_locator) DO NOTHING;
+
 
 -- migrate:down
+
+DELETE FROM ai_intel.news_sources
+WHERE (source_type, source_locator) IN (
+    ('web', 'https://openrouter.ai/announcements'),
+    ('github', 'ollama/ollama'),
+    ('github', 'open-webui/open-webui'),
+    ('github', 'n8n-io/n8n')
+);
 
 DROP TRIGGER IF EXISTS trg_daily_briefs_updated_at
     ON ai_intel.daily_briefs;
